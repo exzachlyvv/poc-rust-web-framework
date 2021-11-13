@@ -1,26 +1,22 @@
-use crate::Handler;
+use crate::handler::CloneBoxHandler;
 
+#[derive(Clone)]
 pub struct Route {
     pub method: Method,
-    pub handler: Box<dyn Handler>,
+    pub(crate) handler: CloneBoxHandler,
 }
 
-impl Route {
-    pub fn get<T>(handler: T) -> Self
-    where
-        T: Handler + Copy + Clone + Send + Sized + 'static,
-    {
-        Route {
-            method: Method::Get,
-            handler: Box::new(handler),
-        }
-    }
-}
+impl Route {}
 
 #[derive(Clone)]
 pub enum Method {
+    Options,
     Get,
     Post,
     Put,
     Delete,
+    Head,
+    Trace,
+    Connect,
+    Patch,
 }

@@ -1,9 +1,13 @@
 use matchit::Node;
 
+use crate::handler::CloneBoxHandler;
 use crate::Handler;
 use crate::Method;
 use crate::Request;
+use crate::Response;
 use crate::Route;
+
+#[derive(Clone)]
 
 pub struct Router {
     matchit_node: Node<Route>,
@@ -58,7 +62,7 @@ impl Router {
     {
         let route = Route {
             method: method,
-            handler: Box::new(handler),
+            handler: CloneBoxHandler::new(handler),
         };
 
         // TODO: handle this error
@@ -68,14 +72,16 @@ impl Router {
         }
     }
 
-    pub async fn handle(&self, url: &str) {
+    pub async fn handle(&self, request: Request) -> Response {
+        let url = request.url.clone();
+        println!("{:?}", request);
+        // let url = request
         // TODO: handle this error
-        match self.matchit_node.at(url) {
+        match self.matchit_node.at(url.as_str()) {
             Ok(matchit_matched) => {
                 // TODO: pull our route params and create a request model here.
                 let route: &Route = matchit_matched.value;
-                let response = route.handler.call(Request {}).await;
-                println!("{:?}", response);
+                route.handler.0.call(request).await
             }
             Err(error) => panic!("TODO! handle this: {:?}", error),
         }
